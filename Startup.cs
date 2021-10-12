@@ -9,7 +9,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
+using Swashbuckle.AspNetCore.SwaggerGen;
 using System.Linq;
 
 namespace library_api
@@ -54,9 +56,10 @@ namespace library_api
 
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "Library Api", Version = "v1" });
+               // c.SwaggerDoc("v1", new OpenApiInfo { Title = "Library Api", Version = "v1" });
                 c.OperationFilter<RemoveQueryApiVersionParamOperationFilter>();
             });
+            services.ConfigureOptions<ConfigureSwaggerOptions>();
 
             services.AddHealthChecks()
                         .AddNpgSql(connectionString);
@@ -98,6 +101,51 @@ namespace library_api
             {
                 endpoints.MapControllers();
             });
+        }
+    }
+
+    public class ConfigureSwaggerOptions
+           : IConfigureNamedOptions<SwaggerGenOptions>
+    {
+        private readonly IApiVersionDescriptionProvider provider;
+
+        public ConfigureSwaggerOptions(
+            IApiVersionDescriptionProvider provider)
+        {
+            this.provider = provider;
+        }
+
+        public void Configure(SwaggerGenOptions options)
+        {
+            // add swagger document for every API version discovered
+            foreach (var description in provider.ApiVersionDescriptions)
+            {
+                options.SwaggerDoc(
+                    description.GroupName,
+                    CreateVersionInfo(description));
+            }
+        }
+
+        public void Configure(string name, SwaggerGenOptions options)
+        {
+            Configure(options);
+        }
+
+        private OpenApiInfo CreateVersionInfo(
+                ApiVersionDescription description)
+        {
+            var info = new OpenApiInfo()
+            {
+                Title = "Library API",
+                Version = description.ApiVersion.ToString()
+            };
+
+            if (description.IsDeprecated)
+            {
+                info.Description += " This API version has been deprecated.";
+            }
+
+            return info;
         }
     }
 }
