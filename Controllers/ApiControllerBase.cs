@@ -11,8 +11,7 @@ using System.Threading.Tasks;
 namespace library_api.Controllers
 {
     [ApiController]
-    [Route("v{version:apiVersion}/[Controller]")]
-    [ApiVersion("1.0")]
+    [Route("v{version:apiVersion}/[Controller]")]    
     [Produces("application/json")]
     public class ApiControllerBase<T, TEntity> : ControllerBase where T : Entity where TEntity : ICommand
     {

@@ -7,8 +7,9 @@ using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Threading.Tasks;
 
-namespace library_api.Controllers
+namespace library_api.Controllers.V1
 {
+    [ApiVersion("1.0")]
     public class PublisherController : ApiControllerBase<Publisher, PublisherCommand>
     {
         private readonly IPublisherRepository _repository;
