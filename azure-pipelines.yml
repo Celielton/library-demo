@@ -30,17 +30,31 @@ steps:
     arguments: '--configuration $(buildConfiguration)'
 
 - task: DotNetCoreCLI@2
-  displayName: Publish
   inputs:
-    command: publish
-    publishWebProjects: True
-    arguments: '--configuration $(BuildConfiguration) --output $(Build.ArtifactStagingDirectory)'
-    zipAfterPublish: True
+    command: test
+    projects: '**/*Tests/*.csproj'
+    arguments: '--configuration $(buildConfiguration)'
 
-- task: PublishPipelineArtifact@1
+#- task: DotNetCoreCLI@2
+#  displayName: Publish
+#  inputs:
+#    command: publish
+#    publishWebProjects: True
+#    arguments: '--configuration $(BuildConfiguration) --output $(Build.ArtifactStagingDirectory)'
+#    zipAfterPublish: True
+
+#- task: PublishPipelineArtifact@1
+#  displayName: Arctifact Publish
+#  inputs:
+#    targetPath: '$(Build.ArtifactStagingDirectory)' 
+#    artifactName: '$(Build.BuildNumber)' 
+
+- task: PublishTestResults@2
+  displayName: Test Result
+  condition: succeededOrFailed()
   inputs:
-    targetPath: '$(Build.ArtifactStagingDirectory)' 
-    artifactName: '$(Build.BuildNumber)' 
+    testRunner: VSTest
+    testResultsFiles: '**/*.trx'
 
 - task: Docker@2
   inputs:
