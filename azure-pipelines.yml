@@ -11,8 +11,8 @@ pool:
 
 variables:
   buildConfiguration: 'Release'
-  imageName: 'library-demo'
   serviceName: 'jfrom service connection'
+  group: dev-demo
   
 steps:
 - script: echo Build Starting...
