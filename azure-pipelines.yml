@@ -12,7 +12,7 @@ pool:
 variables:
   buildConfiguration: 'Release'
   serviceName: 'jfrom service connection'
-  group: dev-demo
+  - group: dev-demo
   
 steps:
 - script: echo Build Starting...
