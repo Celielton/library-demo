@@ -8,12 +8,12 @@ trigger:
 
 pool:
   vmImage: ubuntu-latest
-
 variables:
-  buildConfiguration: 'Release'
-  serviceName: 'jfrom service connection'
   - group: dev-demo
-  
+  - name: buildConfiguration
+    value: Release
+  - name: serviceName
+    value: jfrom service connection
   
 steps:
 - script: echo Build Starting...
