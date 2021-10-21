@@ -12,41 +12,41 @@ variables:
     value: Release
   - name: serviceName
     value: jfrom service connection
+  - name: dotnetSdkVersion
+    value: '5.x'
 
 stages:
-- stage: PreBuild
+- stage: Build
   condition: ne(variables['Build.Reason'], 'PullRequest')
   jobs:
-  - deployment: LIB_BUILD
+    job: 'Build'
     displayName: 'LIB_BUILD Deployment'
-    strategy:
-      runOnce:
-        deploy:
-          steps:
-            - script: echo Build Starting...
-              displayName: 'Run a one-line script'
+    steps:    
+      - task: DotNetCoreCLI@2
+        displayName: Restore
+        inputs:
+          command: 'restore'
+          projects: '**/*.csproj'
+          version: '$(dotnetSdkVersion)'
+    
+      - task: DotNetCoreCLI@2
+        displayName: Build
+        inputs:
+          command: build
+          projects: '**/*.csproj'
+          arguments: '--configuration $(buildConfiguration)'
+          version: '$(dotnetSdkVersion)'
+    
+      - task: DotNetCoreCLI@2
+        displayName: Test execution
+        inputs:
+          command: test
+          projects: '**/*Tests/*.csproj'
+          arguments: '--configuration $(buildConfiguration) --collect "Code coverage"'
+          version: '$(dotnetSdkVersion)'
 
-            - task: DotNetCoreCLI@2
-              displayName: Restore
-              inputs:
-                command: 'restore'
-                projects: '**/*.csproj'
-
-            - task: DotNetCoreCLI@2
-              displayName: Build
-              inputs:
-                command: build
-                projects: '**/*.csproj'
-                arguments: '--configuration $(buildConfiguration)'
-
-            - task: DotNetCoreCLI@2
-              displayName: Test execution
-              inputs:
-                command: test
-                projects: '**/*Tests/*.csproj'
-                arguments: '--configuration $(buildConfiguration) --collect "Code coverage"'
 - stage: Development
-  dependsOn: PreBuild
+  dependsOn: Build
   condition: and(succeeded(), variables['Build.Reason'], 'PullRequest')
   jobs:
   - deployment: LIB_DEVELOPMENT
