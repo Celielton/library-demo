@@ -17,9 +17,9 @@ stages:
 - stage: Development
   condition: ne(variables['Build.Reason'], 'PullRequest')
   jobs:
-  - deployment: ICAS_DEV
-    displayName: 'ICAS_DEV Deployment'
-    environment: ICAS_DEVELOPMENT
+  - deployment: LIB_DEVELOPMENT
+    displayName: 'LIB_DEVELOPMENT Deployment'
+    environment: LIB_DEVELOPMENT
     strategy:
       runOnce:
         deploy:
