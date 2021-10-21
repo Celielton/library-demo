@@ -21,7 +21,7 @@ stages:
   displayName: 'Build'
   jobs:
   - job: 'Build'
-    displayName: 'LIB_BUILD Deployment'
+    displayName: 'Build'
     steps:    
       - task: DotNetCoreCLI@2
         displayName: Restore
