@@ -14,7 +14,7 @@ variables:
     value: jfrom service connection
 
 stages:
-- stage: Pre-Build
+- stage: PreBuild
   condition: ne(variables['Build.Reason'], 'PullRequest')
   jobs:
   - deployment: LIB_BUILD
@@ -46,7 +46,7 @@ stages:
                 projects: '**/*Tests/*.csproj'
                 arguments: '--configuration $(buildConfiguration) --collect "Code coverage"'
 - stage: Development
-  dependsOn: Pre-Build
+  dependsOn: PreBuild
   condition: and(succeeded(), variables['Build.Reason'], 'PullRequest')
   jobs:
   - deployment: LIB_DEVELOPMENT
