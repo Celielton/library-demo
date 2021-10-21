@@ -47,7 +47,7 @@ stages:
                 arguments: '--configuration $(buildConfiguration) --collect "Code coverage"'
 - stage: Development
   dependsOn: Pre-Build
-  condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest')
+  condition: and(succeeded(), variables['Build.Reason'], 'PullRequest')
   jobs:
   - deployment: LIB_DEVELOPMENT
     displayName: 'LIB_DEVELOPMENT Deployment'
