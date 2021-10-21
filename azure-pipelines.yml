@@ -14,12 +14,11 @@ variables:
     value: jfrom service connection
 
 stages:
-- stage: Development
+- stage: Pre-Build
   condition: ne(variables['Build.Reason'], 'PullRequest')
   jobs:
-  - deployment: LIB_DEVELOPMENT
-    displayName: 'LIB_DEVELOPMENT Deployment'
-    environment: LIB_DEVELOPMENT
+  - deployment: LIB_BUILD
+    displayName: 'LIB_BUILD Deployment'
     strategy:
       runOnce:
         deploy:
@@ -46,16 +45,27 @@ stages:
                 command: test
                 projects: '**/*Tests/*.csproj'
                 arguments: '--configuration $(buildConfiguration) --collect "Code coverage"'
-
+- stage: Development
+  dependsOn: Pre-Build
+  condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest')
+  jobs:
+  - deployment: LIB_DEVELOPMENT
+    displayName: 'LIB_DEVELOPMENT Deployment'
+    environment: LIB_DEVELOPMENT
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+            - script: echo Build Starting...
+              displayName: 'Run a one-line script'
             - task: Docker@2
               inputs:
                 command: 'build'
                 Dockerfile: '**/Dockerfile'
-                repository: $(imageName)
-    
+                repository: $(imageName)   
 
-#- task: ArtifactoryDocker@1
-#  inputs:
-#    artifactoryService: '$(serviceName)'
-#    command: 'push'
-#    imageName: '$(imageName)' 
+            #- task: ArtifactoryDocker@1
+            #  inputs:
+            #    artifactoryService: '$(serviceName)'
+            #    command: 'push'
+            #    imageName: '$(imageName)' 
