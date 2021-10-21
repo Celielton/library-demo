@@ -47,10 +47,11 @@ stages:
           version: '$(dotnetSdkVersion)'
 
       - task: Docker@2
-              inputs:
-                command: 'build'
-                Dockerfile: '**/Dockerfile'
-                repository: $(imageName)   
+        displayName: Docker Build
+        inputs:
+          command: 'build'
+          Dockerfile: '**/Dockerfile'
+          repository: $(imageName)   
 
      #- task: ArtifactoryDocker@1
      #  inputs:
