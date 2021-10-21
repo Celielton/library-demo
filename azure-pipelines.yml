@@ -17,9 +17,10 @@ variables:
 
 stages:
 - stage: Build
+  displayName: 'Build'
   condition: ne(variables['Build.Reason'], 'PullRequest')
   jobs:
-    job: 'Build'
+  - job: 'Build'
     displayName: 'LIB_BUILD Deployment'
     steps:    
       - task: DotNetCoreCLI@2
