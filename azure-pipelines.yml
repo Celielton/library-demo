@@ -46,6 +46,18 @@ stages:
           arguments: '--configuration $(buildConfiguration) --collect "Code coverage"'
           version: '$(dotnetSdkVersion)'
 
+      - task: Docker@2
+              inputs:
+                command: 'build'
+                Dockerfile: '**/Dockerfile'
+                repository: $(imageName)   
+
+     #- task: ArtifactoryDocker@1
+     #  inputs:
+     #    artifactoryService: '$(serviceName)'
+     #    command: 'push'
+     #    imageName: '$(imageName)' 
+
 - stage: Development
   dependsOn: Build
   condition: and(succeeded(), variables['Build.Reason'], 'PullRequest')
@@ -57,16 +69,5 @@ stages:
       runOnce:
         deploy:
           steps:
-            - script: echo Build Starting...
-              displayName: 'Run a one-line script'
-            - task: Docker@2
-              inputs:
-                command: 'build'
-                Dockerfile: '**/Dockerfile'
-                repository: $(imageName)   
-
-            #- task: ArtifactoryDocker@1
-            #  inputs:
-            #    artifactoryService: '$(serviceName)'
-            #    command: 'push'
-            #    imageName: '$(imageName)' 
+            - script: echo Release Starting...
+              displayName: 'Run Dev Release'          
