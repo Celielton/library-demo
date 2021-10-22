@@ -3,7 +3,12 @@
 # Add steps that build, run tests, deploy, and more:
 # https://aka.ms/yaml
 trigger:
- - '*'
+ - main
+ - develop
+ - feature/*
+ - bugfix/*
+ - hotfix/*
+ - release/*
 
 pool:
   vmImage: ubuntu-latest
@@ -63,12 +68,41 @@ stages:
   dependsOn: Build
   condition: and(succeeded(), variables['Build.Reason'], 'PullRequest')
   jobs:
-  - deployment: LIB_DEVELOPMENT
-    displayName: 'LIB_DEVELOPMENT Deployment'
-    environment: LIB_DEVELOPMENT
+  - deployment: Development
+    displayName: 'Development'
+    environment: Development
     strategy:
       runOnce:
         deploy:
           steps:
             - script: echo Release Starting...
-              displayName: 'Run Dev Release'          
+              displayName: 'Run Dev Release'      
+              
+
+- stage: Staging
+  dependsOn: Development
+  condition: and(succeeded(), variables['Build.Reason'], 'PullRequest')
+  jobs:
+  - deployment: Staging
+    displayName: 'Staging'
+    environment: Staging
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+            - script: echo Release Starting...
+              displayName: 'Run Stage Release'   
+
+- stage: Production
+  dependsOn: Staging
+  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/release/*'))
+  jobs:
+  - deployment: Production
+    displayName: 'Production'
+    environment: Production
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+            - script: echo Release Starting...
+              displayName: 'Run Production Release' 
