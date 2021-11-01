@@ -68,7 +68,6 @@ stages:
      #    artifactoryService: '$(serviceName)'
      #    command: 'push'
      #    imageName: '$(imageName)' 
-
 - stage: Development
   dependsOn: Build
   condition: and(succeeded(), variables['Build.Reason'], 'PullRequest')
@@ -81,42 +80,30 @@ stages:
         deploy:
           steps:
             - script: echo Release Starting...
-              displayName: 'Run Dev Release'        
-resources: 
-  pipelines:
-  - pipeline: 
-    trigger:
-     tags:
-     - qa*
-     stages:
-     - stage: Staging
-       dependsOn: Development
-       condition: and(succeeded(), startsWith(variables['build.sourceBranch'], 'refs/tags/qa*'))
-       jobs:
-       - deployment: Staging
-         displayName: 'Staging'
-         environment: Staging
-         strategy:
-           runOnce:
-             deploy:
-               steps:
-                 - script: echo Release Starting...
-                   displayName: 'Run Stage Release'   
-  - pipeline: 
-    trigger:
-     tags:
-     - rc*
-     stages:
-     - stage: Production
-       dependsOn: Staging
-       condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/release/*'))
-       jobs:
-       - deployment: Production
-         displayName: 'Production'
-         environment: Production
-         strategy:
-           runOnce:
-             deploy:
-               steps:
-                 - script: echo Release Starting...
-                   displayName: 'Run Production Release' 
+              displayName: 'Run Dev Release'     
+- stage: Staging
+  dependsOn: Development
+  condition: and(succeeded(), startsWith(variables['build.sourceBranch'], 'refs/tags/qa*'))
+  jobs:
+  - deployment: Staging
+    displayName: 'Staging'
+    environment: Staging
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+            - script: echo Release Starting...
+              displayName: 'Run Stage Release'   
+- stage: Production
+  dependsOn: Staging
+  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/release/*'))
+  jobs:
+  - deployment: Production
+    displayName: 'Production'
+    environment: Production
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+            - script: echo Release Starting...
+              displayName: 'Run Production Release' 
