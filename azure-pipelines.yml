@@ -102,8 +102,6 @@ resources:
                steps:
                  - script: echo Release Starting...
                    displayName: 'Run Stage Release'   
-resources: 
-  pipelines:
   - pipeline: 
     trigger:
      tags:
