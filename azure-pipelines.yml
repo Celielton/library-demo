@@ -3,12 +3,17 @@
 # Add steps that build, run tests, deploy, and more:
 # https://aka.ms/yaml
 trigger:
- - main
- - develop
- - feature/*
- - bugfix/*
- - hotfix/*
- - release/*
+ tags:
+   include:
+    - '*'
+ branches:
+   include:
+    - main
+    - develop
+    - feature/*
+    - bugfix/*
+    - hotfix/*
+    - release/*
 
 pool:
   vmImage: ubuntu-latest
