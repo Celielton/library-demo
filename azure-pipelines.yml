@@ -2,51 +2,106 @@
 # Start with a minimal pipeline that you can customize to build and deploy your code.
 # Add steps that build, run tests, deploy, and more:
 # https://aka.ms/yaml
-
 trigger:
-- main
+ - main
+ - develop
+ - feature/*
+ - bugfix/*
+ - hotfix/*
+ - release/*
 
 pool:
   vmImage: ubuntu-latest
-
 variables:
-  buildConfiguration: 'Release'
-  imageName: 'library-demo'
-  serviceName: 'jfrom service connection'
-  
-steps:
-- script: echo Build Starting...
-  displayName: 'Run a one-line script'
+  - group: dev-demo
+  - name: buildConfiguration
+    value: Release
+  - name: serviceName
+    value: jfrom service connection
+  - name: dotnetSdkVersion
+    value: '5.x'
 
-- task: DotNetCoreCLI@2
-  displayName: Restore
-  inputs:
-    command: 'restore'
-    projects: '**/*.csproj'
-
-- task: DotNetCoreCLI@2
-  displayName: Build
-  inputs:
-    command: build
-    projects: '**/*.csproj'
-    arguments: '--configuration $(buildConfiguration)'
-
-- task: DotNetCoreCLI@2
-  displayName: Test execution
-  inputs:
-    command: test
-    projects: '**/*Tests/*.csproj'
-    arguments: '--configuration $(buildConfiguration) --collect "Code coverage"'
-
-- task: Docker@2
-  inputs:
-    command: 'build'
-    Dockerfile: '**/Dockerfile'
-    repository: $(imageName)
+stages:
+- stage: Build
+  displayName: 'Build'
+  jobs:
+  - job: 'Build'
+    displayName: 'Build'
+    steps:    
+      - task: DotNetCoreCLI@2
+        displayName: Restore
+        inputs:
+          command: 'restore'
+          projects: '**/*.csproj'
+          version: '$(dotnetSdkVersion)'
     
+      - task: DotNetCoreCLI@2
+        displayName: Build
+        inputs:
+          command: build
+          projects: '**/*.csproj'
+          arguments: '--configuration $(buildConfiguration)'
+          version: '$(dotnetSdkVersion)'
+    
+      - task: DotNetCoreCLI@2
+        displayName: Test execution
+        inputs:
+          command: test
+          projects: '**/*Tests/*.csproj'
+          arguments: '--configuration $(buildConfiguration) --collect "Code coverage"'
+          version: '$(dotnetSdkVersion)'
 
-#- task: ArtifactoryDocker@1
-#  inputs:
-#    artifactoryService: '$(serviceName)'
-#    command: 'push'
-#    imageName: '$(imageName)'
+      - task: Docker@2
+        displayName: Docker Build
+        inputs:
+          command: 'build'
+          Dockerfile: '**/Dockerfile'
+          repository: $(imageName)   
+
+     #- task: ArtifactoryDocker@1
+     #  inputs:
+     #    artifactoryService: '$(serviceName)'
+     #    command: 'push'
+     #    imageName: '$(imageName)' 
+
+- stage: Development
+  dependsOn: Build
+  condition: and(succeeded(), variables['Build.Reason'], 'PullRequest')
+  jobs:
+  - deployment: Development
+    displayName: 'Development'
+    environment: Development
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+            - script: echo Release Starting...
+              displayName: 'Run Dev Release'      
+              
+
+- stage: Staging
+  dependsOn: Development
+  condition: and(succeeded(), variables['Build.Reason'], 'PullRequest', startsWith(variables['build.sourceBranch'], 'refs/tags/qa*'))
+  jobs:
+  - deployment: Staging
+    displayName: 'Staging'
+    environment: Staging
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+            - script: echo Release Starting...
+              displayName: 'Run Stage Release'   
+- stage: Production
+  dependsOn: Staging
+  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/release/*'))
+  jobs:
+  - deployment: Production
+    displayName: 'Production'
+    environment: Production
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+            - script: echo Release Starting...
+              displayName: 'Run Production Release' 
