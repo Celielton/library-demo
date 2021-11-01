@@ -81,7 +81,7 @@ stages:
 
 - stage: Staging
   dependsOn: Development
-  condition: and(succeeded(), variables['Build.Reason'], 'PullRequest')
+  condition: and(succeeded(), variables['Build.Reason'], 'PullRequest', startsWith(variables['build.sourceBranch'], 'refs/tags/qa*'))
   jobs:
   - deployment: Staging
     displayName: 'Staging'
@@ -92,7 +92,6 @@ stages:
           steps:
             - script: echo Release Starting...
               displayName: 'Run Stage Release'   
-
 - stage: Production
   dependsOn: Staging
   condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/release/*'))
