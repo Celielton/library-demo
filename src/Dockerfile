@@ -8,6 +8,7 @@ RUN dotnet --version
 COPY *.csproj ./
 RUN dotnet restore
 
+
 # Build
 COPY . ./
 RUN dotnet publish -c Release -o out

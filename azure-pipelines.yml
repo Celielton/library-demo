@@ -76,12 +76,10 @@ stages:
         deploy:
           steps:
             - script: echo Release Starting...
-              displayName: 'Run Dev Release'      
-              
-
+              displayName: 'Run Dev Release'                   
 - stage: Staging
   dependsOn: Development
-  condition: and(succeeded(), variables['Build.Reason'], 'PullRequest', startsWith(variables['build.sourceBranch'], 'refs/tags/qa*'))
+  condition: and(succeeded(), startsWith(variables['build.sourceBranch'], 'refs/tags/qa*'))
   jobs:
   - deployment: Staging
     displayName: 'Staging'
