@@ -8,6 +8,12 @@ nupkg/
 # Visual Studio Code
 .vscode
 
+# SonarQube
+.sonarqube
+
+# Tools
+tools
+
 # Rider
 .idea
 

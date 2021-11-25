@@ -2,6 +2,7 @@
 using Shared.Core.API.ViewModel;
 using Shared.Core.Application;
 using Shared.Core.Domain.Entities;
+using Shared.Core.Exception;
 using Shared.Core.Infrastructure.Repository;
 using Shared.Core.Infrastructure.UnitOfWork;
 using System;
@@ -10,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace Shared.Application.Services
 {
-    public class ApplicationService<T> : IApplicationService<T> where T : Entity 
+    public class ApplicationService<T> : IApplicationService<T> where T : Entity
     {
         private readonly IRepository<T> _repository;
         private readonly IUnitOfWork _unitOfWork;
@@ -27,6 +28,7 @@ namespace Shared.Application.Services
         {
             await _repository.AddAsync(entity);
             await _unitOfWork.CommitAsync();
+
         }
 
         public async Task<T> GetAsync(Guid id)
@@ -56,7 +58,7 @@ namespace Shared.Application.Services
         {
             var entity = await _repository.GetAsync(id);
             if (entity == null)
-                throw new NotImplementedException(); //NotFoundException
+                throw new NotFoundException();
 
             await _unitOfWork.BeginTransactionAsync();
 
@@ -70,7 +72,7 @@ namespace Shared.Application.Services
         {
             var oldEntity = await _repository.GetAsync(entity.Id);
             if (oldEntity == null)
-                throw new NotImplementedException(); //NotFoundException
+                throw new NotFoundException();
 
             await _unitOfWork.BeginTransactionAsync();
 

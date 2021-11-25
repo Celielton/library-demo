@@ -10,6 +10,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
+using Shared.API;
 using Shared.Application.ApiVersion;
 using Shared.Application.Services;
 using Shared.Application.Swagger;
@@ -82,6 +83,8 @@ namespace library_api
             }
 
             app.UseHttpsRedirection();
+
+            app.RegisterExceptionMiddleware();
 
             app.UseRouting();
 
