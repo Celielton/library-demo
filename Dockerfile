@@ -1,27 +1,31 @@
-﻿FROM mcr.microsoft.com/dotnet/sdk:5.0-alpine AS build-env
+﻿ARG SDK=5.0
+ARG RUNTIME=5.0
+
+FROM mcr.microsoft.com/dotnet/aspnet:$RUNTIME AS base
 WORKDIR /app
+EXPOSE 80
 
-#Show .NET version
-RUN dotnet --version
+FROM mcr.microsoft.com/dotnet/sdk:$SDK AS build
+WORKDIR /sln
 
-# copy csproj then restore
+# Copy the main source project files
 COPY ./*.sln ./
-COPY src/Presentation/*.csproj src/Presentation/
-COPY src/Shared.Application/*.csproj src/Shared.Application/
-COPY src/Shared.Infrastructure/*.csproj src/Shared.Infrastructure/
-COPY src/Shared.Domain/*.csproj src/Shared.Domain/
-COPY src/Shared.Core/*.csproj src/Shared.Core/
-COPY tests/Library.Tests/*.csproj tests/Library.Tests/
+COPY src/*/*.csproj ./
+RUN for file in $(ls *.csproj); do mkdir -p src/${file%.*}/ && mv $file src/${file%.*}/; done
 RUN dotnet restore
+
+COPY ./src ./src
+RUN dotnet publish "./src/Presentation/library-api/library-api.csproj" -c Release -o "./dist" --no-restore
+RUN rm ./dist/*.pdb
+RUN rm ./dist/*deps.json
 
 # Build
 COPY . .
 RUN dotnet publish -c Release -o out
 
 # Build image
-FROM mcr.microsoft.com/dotnet/aspnet:5.0-alpine
+FROM base AS final
 WORKDIR /app
-COPY --from=build-env /app/out .
-EXPOSE 80
-EXPOSE 443
-ENTRYPOINT ["dotnet", "library-api.dll", "--environment=Development"]
+ENV ASPNETCORE_ENVIRONMENT Local
+COPY --from=build /sln/dist .
+ENTRYPOINT ["dotnet", "library-api.dll"]
