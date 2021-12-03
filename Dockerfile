@@ -11,7 +11,7 @@ WORKDIR /sln
 # Copy the main source project files
 COPY ./*.sln ./
 COPY src/*/*.csproj ./
-RUN for file in $(ls *.csproj); do mkdir -p src/${file%.*}/ && mv $file src/${file%.*}/; done
+RUN for file in $(ls *.csproj);do echo file%.*; do mkdir -p src/${file%.*}/ && mv $file src/${file%.*}/; done
 RUN dotnet restore
 
 COPY ./src ./src
